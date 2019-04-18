@@ -9,8 +9,8 @@ var bodyParser = require('body-parser');
 
 var app = express()
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json())
+app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
+app.use(bodyParser.json({limit: '50mb'}))
 
 var connection = mysql.createConnection({
   host     : '127.0.0.1',
@@ -18,6 +18,43 @@ var connection = mysql.createConnection({
   password : 'armando123',
   database : 'sargazo_web'
 });
+
+app.get("/obtenerFotosDetalles", (req, res) => {
+  let id  = '"' + req.query.id + '"'
+  connection.query('SELECT * FROM `seguimiento_fotos` WHERE proyectos_detalles_seguimiento_id = ' + id, (error, results, fields) => {
+    console.log("yes")
+    if (error) {
+      console.log(error)
+      res.status(403).json([])
+    } else {
+      res.json(results)
+    }
+  });
+})
+
+app.post("/guardarFotosDetalles", (req, res) => {
+  let query = 'INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `proyectos_detalles_id`, `foto`) VALUES ?'// + request_fotos
+  let request_table = req.body.fotos.map((ft, i) => 
+    [uuidv4(), ft.id_detalle ? ft.id_detalle : null, ft.id_proyecto ? ft.id_proyecto : null, ft.img]
+  )
+  //let table = [uuidv4(), req.body.id_detalle ? req.body.id_detalle : null, req.body.id_proyecto ? req.body.id_proyecto : null, req.body.img]
+  //console.log(request_table[0][0], request_table[0][1], request_table[0][2], request_table[0][3].length, request_table[1][0], request_table[1][1], request_table[1][2], request_table[1][3].length)
+  //query = mysql.format(query, [request_table]);
+  connection.query(query, [request_table], (error, results, fields) => {
+    if (error) {
+      console.log("error")
+      res.status(403).json([])
+    } else {
+      res.json(results)
+    }
+  });
+})
+
+app.get("/obtenerFotosProyectos", (req, res) => {
+  connection.query('SELECT * FROM `seguimiento_fotos` WHERE ', (error, results, fields) => {
+    res.json(results)
+  });
+})
 
 app.get("/obtenerDetalles", (req, res) => {
   connection.query('SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id', (error, results, fields) => {
@@ -376,14 +413,27 @@ const program = async () => {
             return StringReturn + ' OR proyectos_detalles_seguimiento.id = "' + Row.after.id + '"'
           }
         }, "")
-        setTimeout(
-         connection.query('SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id WHERE ' + affectedRows, (error, results, fields) => {
+        setTimeout(connection.query('SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id WHERE ' + affectedRows, (error, results, fields) => {
+          let fused_query_events = event.affectedRows.map(row => {
+            for (let query_row in results) {
+              if (row.after.id === results[query_row].id) {
+                let new_row = row.after
+                new_row.playaNombre = results[query_row].playaNombre
+                new_row.seguimientoNombre = results[query_row].seguimientoNombre
+                new_row.proyectoNombre = results[query_row].proyectoNombre
+                new_row.depositoNombre = results[query_row].depositoNombre
+                return (
+                  new_row
+                )
+              }
+            }
+          })
           var msg = {
             type: "subscriptionProyectoSeguimiento",
-            payload: results
+            payload: fused_query_events
           }
           ws.send(JSON.stringify(msg));
-        }), 100)
+        }), 500)
       }
       else if (event.type === "DELETE") {
         let affectedRows = event.affectedRows.map((NewAndUpdatedRow) => {
