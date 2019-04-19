@@ -75,8 +75,18 @@ app.get("/obtenerProyectos", (req, res) => {
 })
 
 app.post("/createDetalle", (req, res) => {
-  console.log(req.body)
-  res.json("Hi!")
+  let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `num_empleados`, `activo`) VALUES ?"
+  let { id, proyecto_detalles_id, id_playa, cat_deposito_id, id_tipo_seguimiento, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo } = req.body
+  let request_table = [[id, proyecto_detalles_id, id_playa, "4401684b-e55b-4ad9-aaf8-0a88002b849d","1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo]]
+  connection.query(query, [request_table], (error, results, fields) => {
+    if (error) {
+      res.status(403).json([])
+    } else {
+      console.log("Written")
+      res.status(403).json([])
+      //res.json(results)
+    }
+  });
 })
 
 app.post('/updateUser', (req, res) => {
