@@ -16,7 +16,7 @@ var connection = mysql.createConnection({
   host     : '127.0.0.1',
   user     : 'nuclearWinters',
   password : 'armando123',
-  database : 'sargazo_transaccional'
+  database : 'sargazo_transaccional_nv'
 });
 
 app.get("/imagenPortadaDetalles", (req, res) => {
@@ -404,7 +404,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'user_info',
-    expression: 'sargazo_transaccional.users',
+    expression: 'sargazo_transaccional_nv.users',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE") {
@@ -421,7 +421,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles',
-    expression: 'sargazo_transaccional.proyectos_detalles',
+    expression: 'sargazo_transaccional_nv.proyectos_detalles',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
@@ -451,7 +451,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles_seguimiento',
-    expression: 'sargazo_transaccional.proyectos_detalles_seguimiento',
+    expression: 'sargazo_transaccional_nv.proyectos_detalles_seguimiento',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
