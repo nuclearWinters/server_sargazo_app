@@ -19,6 +19,8 @@ var connection = mysql.createConnection({
   database : 'sargazo_transaccional_nv'
 });
 
+/*/obtenerDepositos*/
+
 app.get("/imagenPortadaDetalles", (req, res) => {
   let id = req.query.id
   connection.query('SELECT * FROM `seguimiento_fotos` WHERE proyectos_detalles_seguimiento_id = "'+id+'" LIMIT 1' , (error, results, fields) => {
@@ -43,6 +45,7 @@ app.get("/imagenPortadaProyectos", (req, res) => {
 
 app.put("/findProyectoDetallesSeguimientoByIDAndUpdate", (req, res) => {
   let table = [req.body.coord_inicio_x, req.body.coord_inicio_y, req.body.coord_fin_x, req.body.coord_fin_y, req.body.id]
+  console.log(table)
   let query = 'UPDATE `proyectos_detalles_seguimiento` SET coord_inicio_x = ?, coord_inicio_y = ?, coord_fin_x = ?, coord_fin_y = ? WHERE id = ?'
   query = mysql.format(query, table)
   connection.query(query, (error, results, fields) => {
@@ -52,6 +55,20 @@ app.put("/findProyectoDetallesSeguimientoByIDAndUpdate", (req, res) => {
       res.json(results)
     }
   })
+})
+
+app.get("/obtenerFotosHoteles", (req, res) => {
+  let id  = '"' + req.query.id + '"'
+  connection.query('SELECT * FROM `hoteles_fotos` WHERE cat_hotel_id = ' + id, (error, results, fields) => {
+    console.log("yes")
+    if (error) {
+      console.log(error)
+      res.status(403).json([])
+    } else {
+      console.log(results)
+      res.json(results)
+    }
+  });
 })
 
 app.get("/obtenerFotosDetalles", (req, res) => {
@@ -91,13 +108,20 @@ app.get("/obtenerFotosProyectos", (req, res) => {
   });
 })
 //SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
+//SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
 app.get("/obtenerDetalles", (req, res) => {
-  connection.query('SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id', (error, results, fields) => {
+  connection.query('SELECT * FROM `proyectos_detalles_seguimiento`', (error, results, fields) => {
     if (error) {
       console.log(error)
     } else {
       res.json(results)
     }
+  });
+})
+
+app.get("/obtenerDepositos", (req, res) => {
+  connection.query('SELECT * FROM `cat_depositos`', (error, results, fields) => {
+    res.json(results)
   });
 })
 
@@ -114,15 +138,18 @@ app.get("/obtenerProyectos", (req, res) => {
 })
 
 app.post("/createDetalle", (req, res) => {
+  console.log("Llego")
   let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `num_empleados`, `activo`) VALUES ?"
   let { id, proyecto_detalles_id, id_playa, cat_deposito_id, id_tipo_seguimiento, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo } = req.body
-  let request_table = [[id, proyecto_detalles_id, id_playa, "4401684b-e55b-4ad9-aaf8-0a88002b849d","1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo]]
+  let request_table = [[id, proyecto_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo]]
+  console.log(request_table)
+  //res.status(403).json([])
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
+      console.log(error)
       res.status(403).json([])
     } else {
       console.log("Written")
-      //res.status(403).json([])
       res.json(results)
     }
   });
@@ -176,6 +203,7 @@ app.get('/loginFB', (req, res) => {
         email: results[0].email,
         apellidos: results[0].apellidos,
         grupo: results[0].cat_grupo_id,
+        hotel: result[0].cat_hoteles_id,
         username: results[0].username
       }, 'sm2programadores')
       res.json(token)
@@ -208,10 +236,12 @@ app.get('/login', (req, res) => {
   let username = req.query.username
   let password = req.query.password
   var query = "SELECT * FROM `users` WHERE username = ?";
-	var table = [username];
+  var table = [username];
+  console.log(username, password)
   query = mysql.format(query,table);
   connection.query(query, (error, results, fields) => {
     if (results.length !== 0) {
+      console.log("Existe")
       const hashBool = bcrypt.compareSync(password, results[0].password)
       if (hashBool) {
         var token = jwt.sign({
@@ -220,15 +250,19 @@ app.get('/login', (req, res) => {
           email: results[0].email,
           apellidos: results[0].apellidos,
           grupo: results[0].cat_grupo_id,
-          username: results[0].username
+          username: results[0].username,
+          hotel: results[0].cat_hoteles_id
         }, 'sm2programadores')
+        console.log("Accesado")
         res.json(token)
       }
       else {
+        console.log("Negado")
         res.status(403).send("Forbidden")
       }
     }
     else {
+      console.log("Negado")
       res.status(403).send("Forbidden")
     }
   })
@@ -455,35 +489,15 @@ const program = async () => {
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
-        let affectedRows = event.affectedRows.reduce((StringReturn, Row,  i) => {
-          if (i === 0) {
-            return StringReturn + 'proyectos_detalles_seguimiento.id = "' + Row.after.id + '"'
-          }
-          else {
-            return StringReturn + ' OR proyectos_detalles_seguimiento.id = "' + Row.after.id + '"'
-          }
-        }, "")
-        setTimeout(connection.query('SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id WHERE ' + affectedRows, (error, results, fields) => {
-          let fused_query_events = event.affectedRows.map(row => {
-            for (let query_row in results) {
-              if (row.after.id === results[query_row].id) {
-                let new_row = row.after
-                new_row.playaNombre = results[query_row].playaNombre
-                new_row.seguimientoNombre = results[query_row].seguimientoNombre
-                new_row.proyectoNombre = results[query_row].proyectoNombre
-                new_row.depositoNombre = results[query_row].depositoNombre
-                return (
-                  new_row
-                )
-              }
-            }
-          })
-          var msg = {
+        let affectedRows = event.affectedRows.map((NewAndUpdatedRow) => {
+          return NewAndUpdatedRow.after
+        })
+        var msg = {
             type: "subscriptionProyectoSeguimiento",
-            payload: fused_query_events
-          }
-          ws.send(JSON.stringify(msg));
-        }), 500)
+            payload: affectedRows
+        }
+        ws.send(JSON.stringify(msg));
+        console.log(msg)
       }
       else if (event.type === "DELETE") {
         let affectedRows = event.affectedRows.map((NewAndUpdatedRow) => {
@@ -494,7 +508,7 @@ const program = async () => {
           payload: affectedRows
         }
         ws.send(JSON.stringify(msg));
-        //console.log(msg)
+        console.log(msg)
       }
     },
   });
