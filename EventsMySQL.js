@@ -84,6 +84,23 @@ app.get("/obtenerFotosDetalles", (req, res) => {
   });
 })
 
+app.post("/guardarFotosHotel", (req, res) => {
+  let query = 'INSERT INTO `hoteles_fotos`(`id`, `cat_hotel_id`, `foto`, `coord_x`, `coord_y`, `fecha_dispositivo`) VALUES ?'
+  let request_table = req.body.fotos.map((ft, i) => 
+    [uuidv4(), ft.id_hotel, "data:image/jpeg;base64," + ft.image, ft.coord_x, ft.coord_y, ft.date]
+  )
+  //res.status(403).json([])
+  query = mysql.format(query, [request_table]);
+  connection.query(query, [request_table], (error, results, fields) => {
+    if (error) {
+      console.log("error")
+      res.status(403).json([])
+    } else {
+      res.json(results)
+    }
+  });
+})
+
 //INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `proyectos_detalles_id`, `foto`) VALUES ?
 app.post("/guardarFotosDetalles", (req, res) => {
   let query = 'INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `foto`) VALUES ?'
@@ -134,6 +151,26 @@ app.get("/obtenerPlayas", (req, res) => {
 app.get("/obtenerProyectos", (req, res) => {
   connection.query('SELECT * FROM `proyectos_detalles`', (error, results, fields) => {
     res.json(results)
+  });
+})
+
+app.post("/editDetalle", (req, res) => {
+  console.log("Llego")
+  let query = "UPDATE `proyectos_detalles_seguimiento` SET `id_playa`= ?,`cat_deposito_id`= ?,`nombre_coordinador`= ?,`barrera_instalada`= ?,`cantidad_sargazo`= ?,`ml_zona_costera`= ?,`m3_residuo_agua`= ?,`m3_residuo_linea_costera`= ?,`fecha`= ?,`hr_inicio_actividad`= ?,`hr_fin_actividad`= ?,`observaciones`= ?,`viajes_residuos`= ?,`num_empleados`= ?,`modified`= CURRENT_TIMESTAMP WHERE id = ?"
+  let { id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, id } = req.body
+  let request_table = [id_playa, cat_deposito_id , nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, id]
+  console.log(request_table)
+  //res.status(403).json([])
+  let sql = mysql.format(query, request_table)
+  console.log(sql)
+  connection.query(sql, (error, results, fields) => {
+    if (error) {
+      console.log(error)
+      res.status(403).json([])
+    } else {
+      console.log("Written")
+      res.json(results)
+    }
   });
 })
 
@@ -203,7 +240,7 @@ app.get('/loginFB', (req, res) => {
         email: results[0].email,
         apellidos: results[0].apellidos,
         grupo: results[0].cat_grupo_id,
-        hotel: result[0].cat_hoteles_id,
+        hotel: results[0].cat_hoteles_id,
         username: results[0].username
       }, 'sm2programadores')
       res.json(token)
