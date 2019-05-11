@@ -14,9 +14,9 @@ app.use(bodyParser.json({limit: '50mb'}))
 
 var connection = mysql.createConnection({
   host     : '127.0.0.1',
-  user     : 'nuclearWinters',
-  password : 'armando123',
-  database : 'sargazo_transaccional_nv'
+  user     : 'root',
+  password : '@sm2sm2Programad0res',
+  database : 'sargazo_transaccional'
 });
 
 /*/obtenerDepositos*/
@@ -93,7 +93,7 @@ app.post("/guardarFotosHotel", (req, res) => {
   query = mysql.format(query, [request_table]);
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
-      console.log("error")
+      console.log(error)
       res.status(403).json([])
     } else {
       res.json(results)
@@ -111,7 +111,7 @@ app.post("/guardarFotosDetalles", (req, res) => {
   query = mysql.format(query, [request_table]);
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
-      console.log("error")
+      console.log(error)
       res.status(403).json([])
     } else {
       res.json(results)
@@ -124,6 +124,21 @@ app.get("/obtenerFotosProyectos", (req, res) => {
     res.json(results)
   });
 })
+
+app.get("/obtenerContratos", (req, res) => {
+  connection.query('SELECT * FROM `proyectos`', (error, results, fields) => {
+    if (error) {
+      console.log(error)
+    } else {
+      results = results.map(res => {
+        res.archivo_contrato = null
+        return res
+      })
+      res.json(results)
+    }
+  });
+})
+
 //SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
 //SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
 app.get("/obtenerDetalles", (req, res) => {
@@ -156,9 +171,9 @@ app.get("/obtenerProyectos", (req, res) => {
 
 app.post("/editDetalle", (req, res) => {
   console.log("Llego")
-  let query = "UPDATE `proyectos_detalles_seguimiento` SET `id_playa`= ?,`cat_deposito_id`= ?,`nombre_coordinador`= ?,`barrera_instalada`= ?,`cantidad_sargazo`= ?,`ml_zona_costera`= ?,`m3_residuo_agua`= ?,`m3_residuo_linea_costera`= ?,`fecha`= ?,`hr_inicio_actividad`= ?,`hr_fin_actividad`= ?,`observaciones`= ?,`viajes_residuos`= ?,`num_empleados`= ?,`modified`= CURRENT_TIMESTAMP WHERE id = ?"
-  let { id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, id } = req.body
-  let request_table = [id_playa, cat_deposito_id , nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, id]
+  let query = "UPDATE `proyectos_detalles_seguimiento` SET `id_playa`= ?,`cat_deposito_id`= ?,`nombre_coordinador`= ?,`barrera_instalada`= ?,`cantidad_sargazo`= ?,`ml_zona_costera`= ?,`m3_residuo_agua`= ?,`m3_residuo_linea_costera`= ?,`fecha`= ?,`hr_inicio_actividad`= ?,`hr_fin_actividad`= ?,`observaciones`= ?,`viajes_residuos`= ?,`modified`= CURRENT_TIMESTAMP WHERE id = ?"
+  let { id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, id } = req.body
+  let request_table = [id_playa, cat_deposito_id , nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, id]
   console.log(request_table)
   //res.status(403).json([])
   let sql = mysql.format(query, request_table)
@@ -176,9 +191,9 @@ app.post("/editDetalle", (req, res) => {
 
 app.post("/createDetalle", (req, res) => {
   console.log("Llego")
-  let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `num_empleados`, `activo`) VALUES ?"
-  let { id, proyecto_detalles_id, id_playa, cat_deposito_id, id_tipo_seguimiento, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo } = req.body
-  let request_table = [[id, proyecto_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, num_empleados, activo]]
+  let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `activo`) VALUES ?"
+  let { id, proyecto_detalles_id, id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo } = req.body
+  let request_table = [[id, proyecto_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo]]
   console.log(request_table)
   //res.status(403).json([])
   connection.query(query, [request_table], (error, results, fields) => {
@@ -402,6 +417,7 @@ wss.on('connection', function(ws) {
       response = JSON.stringify(msg)
       wss.clients.forEach(function each(client) {
         if (client !== ws && client.readyState === WebSocket.OPEN) {
+          console.log()
           client.send(response);
         }
       });
@@ -430,6 +446,7 @@ wss.on('connection', function(ws) {
     response = JSON.stringify(msg)
     wss.clients.forEach(function each(client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {
+        console.log(client.subscribedTo)
         client.send(response);
       }
     });
@@ -454,14 +471,14 @@ wss.on('connection', function(ws) {
 });
 
 //Cliente
-const ws = new WebSocket('ws://192.168.1.84:8080');
+const ws = new WebSocket('ws://sm2test.cloudapp.net:8080');
 
 //Detector de cambios
 const program = async () => {
   const connection1 = mysql.createConnection({
-    host: 'localhost',
-    user: 'nuclearWinters',
-    password: 'armando123',
+    host: '127.0.0.1',
+    user: 'root',
+    password: '@sm2sm2Programad0res',
   });
 
   const instance = new MySQLEvents(connection1, {
@@ -475,7 +492,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'user_info',
-    expression: 'sargazo_transaccional_nv.users',
+    expression: 'sargazo_transaccional.users',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE") {
@@ -492,7 +509,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles',
-    expression: 'sargazo_transaccional_nv.proyectos_detalles',
+    expression: 'sargazo_transaccional.proyectos_detalles',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
@@ -522,7 +539,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles_seguimiento',
-    expression: 'sargazo_transaccional_nv.proyectos_detalles_seguimiento',
+    expression: 'sargazo_transaccional.proyectos_detalles_seguimiento',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
