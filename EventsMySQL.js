@@ -16,7 +16,7 @@ var connection = mysql.createConnection({
   host     : '127.0.0.1',
   user     : 'root',
   password : '@sm2sm2Programad0res',
-  database : 'sargazo_transaccional'
+  database : 'sargazo_transaccional_nv'
 });
 
 /*/obtenerDepositos*/
@@ -103,9 +103,9 @@ app.post("/guardarFotosHotel", (req, res) => {
 
 //INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `proyectos_detalles_id`, `foto`) VALUES ?
 app.post("/guardarFotosDetalles", (req, res) => {
-  let query = 'INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `foto`) VALUES ?'
+  let query = 'INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `tipo`, `tamanio`, `foto`) VALUES ?'
   let request_table = req.body.fotos.map((ft, i) => 
-    [uuidv4(), ft.id_detalle ? ft.id_detalle : null, "data:image/jpeg;base64," + ft.img]
+    [uuidv4(), ft.id_detalle ? ft.id_detalle : null, "image/jpeg", Buffer.from(ft.img.substring(ft.img.indexOf(',') + 1)).length, "data:image/jpeg;base64," + ft.img]
   )
   //res.status(403).json([])
   query = mysql.format(query, [request_table]);
@@ -119,8 +119,9 @@ app.post("/guardarFotosDetalles", (req, res) => {
   });
 })
 
-app.get("/obtenerFotosProyectos", (req, res) => {
-  connection.query('SELECT * FROM `seguimiento_fotos` WHERE ', (error, results, fields) => {
+
+app.get("/obtenerMunicipios", (req, res) => {
+  connection.query('SELECT * FROM `cat_municipios`', (error, results, fields) => {
     res.json(results)
   });
 })
@@ -192,8 +193,8 @@ app.post("/editDetalle", (req, res) => {
 app.post("/createDetalle", (req, res) => {
   console.log("Llego")
   let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `activo`) VALUES ?"
-  let { id, proyecto_detalles_id, id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo } = req.body
-  let request_table = [[id, proyecto_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo]]
+  let { id, proyectos_detalles_id, id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo } = req.body
+  let request_table = [[id, proyectos_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo]]
   console.log(request_table)
   //res.status(403).json([])
   connection.query(query, [request_table], (error, results, fields) => {
@@ -492,7 +493,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'user_info',
-    expression: 'sargazo_transaccional.users',
+    expression: 'sargazo_transaccional_nv.users',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE") {
@@ -509,7 +510,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles',
-    expression: 'sargazo_transaccional.proyectos_detalles',
+    expression: 'sargazo_transaccional_nv.proyectos_detalles',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
@@ -539,7 +540,7 @@ const program = async () => {
 
   instance.addTrigger({
     name: 'proyectos_detalles_seguimiento',
-    expression: 'sargazo_transaccional.proyectos_detalles_seguimiento',
+    expression: 'sargazo_transaccional_nv.proyectos_detalles_seguimiento',
     statement: MySQLEvents.STATEMENTS.ALL,
     onEvent: (event) => { // You will receive the events here
       if (event.type === "UPDATE" || event.type === "INSERT") {
