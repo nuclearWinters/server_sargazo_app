@@ -19,7 +19,39 @@ var connection = mysql.createConnection({
   database : 'sargazo_transaccional_nv'
 });
 
+
 /*/obtenerDepositos*/
+
+app.post("/post_token_notification", (req, res) => {
+  let { token } = req.body
+  let { user_id } = req.body
+  let query = 'SELECT * from `tokens_notifications` WHERE token = ?'
+  let table = [token]
+  query = mysql.format(query, table)
+  connection.query(query, (error, results, fields) => {
+    if (error) {
+      console.log(error)
+      res.status(403).json([])
+    } else {
+      console.log(results.length)
+      if (results.length === 0) {
+        let query = 'INSERT INTO `tokens_notifications` (`id`, `token`, `user_id`) VALUES ?'
+        let table = [[uuidv4(), token, user_id]]
+        //query = mysql.format(query, table)
+        connection.query(query, [table], (error, results, fields) => {
+          if (error) {
+            console.log(error)
+            res.status(403).json([])
+          } else {
+            res.json(results)
+          }
+        })
+      } else {
+        res.status(403).json([])
+      }
+    }
+  })
+})
 
 app.get("/imagenPortadaDetalles", (req, res) => {
   let id = req.query.id
