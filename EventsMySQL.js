@@ -21,6 +21,11 @@ var connection = mysql.createConnection({
 
 
 /*/obtenerDepositos*/
+app.get("/obtenerHoteles", (req, res) => {
+  connection.query('SELECT * FROM `cat_hoteles`', (error, results, fields) => {
+    res.json(results)
+  });
+})
 
 app.post("/post_token_notification", (req, res) => {
   let { token } = req.body
@@ -92,13 +97,17 @@ app.put("/findProyectoDetallesSeguimientoByIDAndUpdate", (req, res) => {
 app.get("/obtenerFotosHoteles", (req, res) => {
   let id  = '"' + req.query.id + '"'
   connection.query('SELECT * FROM `hoteles_fotos` WHERE cat_hotel_id = ' + id, (error, results, fields) => {
-    console.log("yes")
     if (error) {
       console.log(error)
       res.status(403).json([])
     } else {
       console.log(results)
-      res.json(results)
+      let resultadosSinImagen = results.map(res => {
+        res.foto = null
+        return res
+      })
+      console.log(resultadosSinImagen)
+      res.json(resultadosSinImagen)
     }
   });
 })
@@ -121,7 +130,6 @@ app.post("/guardarFotosHotel", (req, res) => {
   let request_table = req.body.fotos.map((ft, i) => 
     [uuidv4(), ft.id_hotel, "data:image/jpeg;base64," + ft.image, ft.coord_x, ft.coord_y, ft.date]
   )
-  //res.status(403).json([])
   query = mysql.format(query, [request_table]);
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
@@ -133,13 +141,11 @@ app.post("/guardarFotosHotel", (req, res) => {
   });
 })
 
-//INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `proyectos_detalles_id`, `foto`) VALUES ?
 app.post("/guardarFotosDetalles", (req, res) => {
   let query = 'INSERT INTO `seguimiento_fotos`(`id`, `proyectos_detalles_seguimiento_id`, `tipo`, `tamanio`, `foto`) VALUES ?'
   let request_table = req.body.fotos.map((ft, i) => 
     [uuidv4(), ft.id_detalle ? ft.id_detalle : null, "image/jpeg", Buffer.from(ft.img.substring(ft.img.indexOf(',') + 1)).length, "data:image/jpeg;base64," + ft.img]
   )
-  //res.status(403).json([])
   query = mysql.format(query, [request_table]);
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
@@ -150,7 +156,6 @@ app.post("/guardarFotosDetalles", (req, res) => {
     }
   });
 })
-
 
 app.get("/obtenerMunicipios", (req, res) => {
   connection.query('SELECT * FROM `cat_municipios`', (error, results, fields) => {
@@ -172,8 +177,6 @@ app.get("/obtenerContratos", (req, res) => {
   });
 })
 
-//SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
-//SELECT cat_playas.nombre as `playaNombre`, cat_tipo_seguimiento.nombre as `seguimientoNombre`, proyectos_detalles.nombre as `proyectoNombre`, proyectos_detalles_seguimiento.id, proyectos_detalles_seguimiento.proyecto_detalles_id, proyectos_detalles_seguimiento.id_playa, proyectos_detalles_seguimiento.cat_deposito_id, proyectos_detalles_seguimiento.id_tipo_seguimiento, proyectos_detalles_seguimiento.nombre_coordinador, proyectos_detalles_seguimiento.barrera_instalada, proyectos_detalles_seguimiento.coord_inicio_x, proyectos_detalles_seguimiento.coord_inicio_y, proyectos_detalles_seguimiento.coord_fin_x, proyectos_detalles_seguimiento.coord_fin_y, proyectos_detalles_seguimiento.coord_deposito_sargazo, proyectos_detalles_seguimiento.cantidad_sargazo, proyectos_detalles_seguimiento.ml_zona_costera, proyectos_detalles_seguimiento.m3_residuo_agua, proyectos_detalles_seguimiento.m3_residuo_linea_costera, proyectos_detalles_seguimiento.fecha, proyectos_detalles_seguimiento.hr_inicio_actividad, proyectos_detalles_seguimiento.hr_fin_actividad, proyectos_detalles_seguimiento.observaciones, proyectos_detalles_seguimiento.viajes_residuos, proyectos_detalles_seguimiento.num_empleados, proyectos_detalles_seguimiento.activo, proyectos_detalles_seguimiento.created, proyectos_detalles_seguimiento.modified, cat_depositos.nombre as `depositoNombre` FROM `proyectos_detalles_seguimiento` JOIN `cat_playas` ON cat_playas.id = proyectos_detalles_seguimiento.id_playa JOIN `cat_depositos` ON cat_depositos.id = proyectos_detalles_seguimiento.cat_deposito_id JOIN `cat_tipo_seguimiento` ON cat_tipo_seguimiento.id = proyectos_detalles_seguimiento.id_tipo_seguimiento JOIN `proyectos_detalles` ON proyectos_detalles.id = proyectos_detalles_seguimiento.proyecto_detalles_id
 app.get("/obtenerDetalles", (req, res) => {
   connection.query('SELECT * FROM `proyectos_detalles_seguimiento`', (error, results, fields) => {
     if (error) {
@@ -202,33 +205,43 @@ app.get("/obtenerProyectos", (req, res) => {
   });
 })
 
-app.post("/editDetalle", (req, res) => {
-  console.log("Llego")
-  let query = "UPDATE `proyectos_detalles_seguimiento` SET `id_playa`= ?,`cat_deposito_id`= ?,`nombre_coordinador`= ?,`barrera_instalada`= ?,`cantidad_sargazo`= ?,`ml_zona_costera`= ?,`m3_residuo_agua`= ?,`m3_residuo_linea_costera`= ?,`fecha`= ?,`hr_inicio_actividad`= ?,`hr_fin_actividad`= ?,`observaciones`= ?,`viajes_residuos`= ?,`modified`= CURRENT_TIMESTAMP WHERE id = ?"
-  let { id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, id } = req.body
-  let request_table = [id_playa, cat_deposito_id , nombre_coordinador, barrera_instalada, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, id]
-  console.log(request_table)
-  //res.status(403).json([])
-  let sql = mysql.format(query, request_table)
-  console.log(sql)
-  connection.query(sql, (error, results, fields) => {
-    if (error) {
-      console.log(error)
-      res.status(403).json([])
-    } else {
-      console.log("Written")
-      res.json(results)
-    }
-  });
+app.post("recuperarContraseña", (req, res) => {
+  let { email, contraseña } = req.body
+  connection.query('SELECT * FROM `users` WHERE email = "' + email + '" LIMIT 1', (error, results, fields) => {
+    let id = results[0].id
+    constraseñaHash = bcrypt.hashSync(contraseña, 8)
+    connection.query('UPDATE `users` SET password = "' + contraseñaHash + '" WHERE id = "' + id + '"')
+    let transporter = nodeMailer.createTransport({
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        // should be replaced with real sender's account
+        user: 'armandonarcizoruedaperez@gmail.com',
+        pass: 'armando123'
+      }
+    });
+    let mailOptions = {
+      // should be replaced with real recipient's account
+      to: email,
+      subject: "Recuperación de contraseña",
+      body: "Tu contraseña es: " + contraseña
+    };
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+          return console.log(error);
+      }
+      console.log('Message %s sent: %s', info.messageId, info.response);
+    });
+  })
 })
 
 app.post("/createDetalle", (req, res) => {
   console.log("Llego")
-  let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `id_playa`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `ml_zona_costera`, `m3_residuo_agua`, `m3_residuo_linea_costera`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `activo`) VALUES ?"
-  let { id, proyectos_detalles_id, id_playa, cat_deposito_id, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo } = req.body
-  let request_table = [[id, proyectos_detalles_id, id_playa, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467" , nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y,coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, ml_zona_costera, m3_residuo_agua, m3_residuo_linea_costera, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo]]
+  let query = "INSERT INTO `proyectos_detalles_seguimiento`(`id`, `proyecto_detalles_id`, `cat_deposito_id`, `id_tipo_seguimiento`, `nombre_coordinador`, `barrera_instalada`, `coord_inicio_x`, `coord_inicio_y`, `coord_fin_x`, `coord_fin_y`, `coord_deposito_sargazo`, `cantidad_sargazo`, `fecha`, `hr_inicio_actividad`, `hr_fin_actividad`, `observaciones`, `viajes_residuos`, `activo`) VALUES ?"
+  let { id, proyectos_detalles_id, cat_deposito_id, nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y, coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, fecha, hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo } = req.body
+  let request_table = [[id, proyectos_detalles_id, cat_deposito_id, "1c530bf8-9eaf-471b-8fdf-9e3212ff4467", nombre_coordinador, barrera_instalada, coord_inicio_x, coord_inicio_y, coord_fin_x, coord_fin_y, coord_deposito_sargazo, cantidad_sargazo, fecha.slice(0, 10), hr_inicio_actividad, hr_fin_actividad, observaciones, viajes_residuos, activo]]
   console.log(request_table)
-  //res.status(403).json([])
   connection.query(query, [request_table], (error, results, fields) => {
     if (error) {
       console.log(error)
@@ -238,83 +251,6 @@ app.post("/createDetalle", (req, res) => {
       res.json(results)
     }
   });
-})
-
-app.post('/updateUser', (req, res) => {
-  const array = req.body.data
-  let decoded = jwt.verify(req.body.token, 'sm2programadores')
-  let isFirst = true
-  let responseArray = []
-  let properties = array.reduce((str, arr, i) => {
-    for (let every in arr) {
-      if (isFirst !== true && arr[every] !== null) {
-        str += ","
-      }
-      if (arr[every] !== null) {
-        str += " " + every + " = ?"
-        isFirst = false
-        responseArray.push(every)
-      }
-    }
-    return str
-  }, '')
-  let query = "Update users SET" + properties + " WHERE id = ?";
-	let table = array.reduce((ini, arr) => {
-    for (let every in arr) {
-      if (arr[every] !== null) {
-        console.log(arr[every])
-        ini.push(arr[every])
-      }
-    }
-    return ini
-  }, [])
-  table.push(decoded.id)
-  query = mysql.format(query,table)
-  connection.query(query, (error, results, fields) => {
-    res.json(responseArray)
-  })
-})
-
-app.get('/loginFB', (req, res) => {
-  let username = req.query.id
-  var query = "SELECT * FROM `users` WHERE username = ?";
-	var table = [username];
-  query = mysql.format(query,table);
-  connection.query(query, (error, results, fields) => {
-    if (results.length !== 0) {
-      var token = jwt.sign({
-        id: results[0].id,
-        nombre: results[0].nombres,
-        email: results[0].email,
-        apellidos: results[0].apellidos,
-        grupo: results[0].cat_grupo_id,
-        hotel: results[0].cat_hoteles_id,
-        username: results[0].username
-      }, 'sm2programadores')
-      res.json(token)
-    }
-    else if (results.length === 0) {
-      let password = bcrypt.hashSync(req.query.id, 8)
-      let nombre = req.query.nombre
-      let apellidos = req.query.apellido
-      let email = req.query.email
-      let username = req.query.id
-      let grupo = "3727c908-c699-11e8-a393-14dda990f926"
-      let id = uuidv4()
-      let date = new Date()
-      connection.query('INSERT INTO `users`(`id`, `cat_grupo_id`, `nombres`, `apellidos`, `email`, `username`, `password`, `ultimo_acceso`, `activo`) VALUES ("' + id + '","' + grupo + '","' + nombre + '","' + apellidos + '","' + email +'","' + username + '","' + password + '",' + connection.escape(date) + ', 1)', (error, results1, fields) => {
-        var token = jwt.sign({
-          id: id,
-          nombre: req.query.nombre,
-          email: req.query.email,
-          apellidos: req.query.apellido,
-          grupo: "3727c908-c699-11e8-a393-14dda990f926",
-          username: username
-        }, 'sm2programadores')
-        res.json(token)
-      });
-    }
-  })
 })
 
 app.get('/login', (req, res) => {
@@ -348,31 +284,6 @@ app.get('/login', (req, res) => {
     }
     else {
       console.log("Negado")
-      res.status(403).send("Forbidden")
-    }
-  })
-})
-
-app.get('/registro', (req, res) => {
-  connection.query('SELECT EXISTS(SELECT 1 FROM `users` WHERE `username` = "' + req.query.username + '")', (error, results, fields) => { 
-    let response = 0
-    for (const result in results[0]) {
-      response = results[0][result]
-    }
-    if (response === 0) {
-      let password = bcrypt.hashSync(req.query.password, 8)
-      let nombre = req.query.nombre
-      let apellidos = req.query.apellidos
-      let email = req.query.email
-      let username = req.query.username
-      let grupo = req.query.grupo
-      let id = uuidv4()
-      var date = new Date()
-      connection.query('INSERT INTO `users`(`id`, `cat_grupo_id`, `nombres`, `apellidos`, `email`, `username`, `password`, `ultimo_acceso`, `activo`) VALUES ("' + id + '","' + grupo + '","' + nombre + '","' + apellidos + '","' + email +'","' + username + '","' + password + '",' + connection.escape(date) + ', 1)', (error, results, fields) => {
-        res.json(results)
-      })
-    }
-    else {
       res.status(403).send("Forbidden")
     }
   })
