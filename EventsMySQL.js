@@ -6,8 +6,12 @@ var jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const uuidv4 = require('uuid/v4');
 var bodyParser = require('body-parser');
-
+var nodeMailer = require('nodemailer')
 var app = express()
+
+if (process.env.NODE_ENV !== 'production') {
+  require('dotenv').config();
+}
 
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(bodyParser.json({limit: '50mb'}))
@@ -167,6 +171,7 @@ app.get("/obtenerContratos", (req, res) => {
   connection.query('SELECT * FROM `proyectos`', (error, results, fields) => {
     if (error) {
       console.log(error)
+      res.status(403).json([])
     } else {
       results = results.map(res => {
         res.archivo_contrato = null
@@ -205,34 +210,47 @@ app.get("/obtenerProyectos", (req, res) => {
   });
 })
 
-app.post("recuperarContraseña", (req, res) => {
+app.post("/recuperarContrasena", (req, res) => {
   let { email, contraseña } = req.body
+  console.log(email, contraseña)
   connection.query('SELECT * FROM `users` WHERE email = "' + email + '" LIMIT 1', (error, results, fields) => {
-    let id = results[0].id
-    constraseñaHash = bcrypt.hashSync(contraseña, 8)
-    connection.query('UPDATE `users` SET password = "' + contraseñaHash + '" WHERE id = "' + id + '"')
-    let transporter = nodeMailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        // should be replaced with real sender's account
-        user: 'armandonarcizoruedaperez@gmail.com',
-        pass: 'armando123'
-      }
-    });
-    let mailOptions = {
-      // should be replaced with real recipient's account
-      to: email,
-      subject: "Recuperación de contraseña",
-      body: "Tu contraseña es: " + contraseña
-    };
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-          return console.log(error);
-      }
-      console.log('Message %s sent: %s', info.messageId, info.response);
-    });
+    if (error) {
+      console.log(error)
+      res.status(403).json([])
+    } else {
+      let id = results[0].id
+      let contraseñaHash = bcrypt.hashSync(contraseña, 8)
+      connection.query('UPDATE `users` SET password = "' + contraseñaHash + '" WHERE id = "' + id + '"', () => {
+        if (error) {
+          console.log(error)
+          res.status(403).json([])
+        } else {
+          let transporter = nodeMailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+              // should be replaced with real sender's account
+              user: 'soporte.sm2consultores@gmail.com',
+              pass: '@sm2sm2Correo'
+            }
+          })
+          let mailOptions = {
+            // should be replaced with real recipient's account
+            to: email,
+            subject: "Recuperación de contraseña",
+            text: "Tu nueva contraseña es: " + contraseña
+          };
+          transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                return console.log(error);
+            }
+            console.log('Message %s sent: %s', info.messageId, info.response);
+            res.json("Yaas")
+          })
+        }
+      })
+    } 
   })
 })
 
